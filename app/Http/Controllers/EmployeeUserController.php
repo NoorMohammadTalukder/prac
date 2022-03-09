@@ -5,6 +5,8 @@ use Illuminate\Http\Request;
 use App\Models\EmployeeUser;
 use App\Http\Requests\StoreEmployeeUserRequest;
 use App\Http\Requests\UpdateEmployeeUserRequest;
+use Session;
+// use App\Http\Controllers\Session;
 
 class EmployeeUserController extends Controller
 {
@@ -125,9 +127,79 @@ class EmployeeUserController extends Controller
         return view('pages.user.userLogin');
     }
 
-    public function userLoginSubmit(){
-        return "ok";
+    // public function userLoginSubmit(){
+    //     return "ok";
+    // }
+
+    public function userLoginSubmit(Request $request){
+        $validate=$request->validate([
+            'email'=>'required',
+            'password'=>'required',
+           
+        ],
+        [
+            'email.required'=>'Please put your email',
+            'password.required'=>'Please put your password',
+           
+    
+        ]);
+
+        $user=EmployeeUser::where("email",$request->email)
+        ->where("password",$request->password)
+        ->first();
+        if ($user){
+            // return "hi";
+            $request->session()->put("userName",$user->name);
+            $request->session()->put("userId",$user->id);
+            $request->session()->put("userPhone",$user->phone);
+            $request->session()->put("userAddress",$user->address);
+            $request->session()->put("userPassword",$user->password);
+            $request->session()->put("userEmail",$user->email);
+
+            return redirect()->route("userDash");
+        }
+        return back();
     }
 
-   
+    public function userDash(){
+        return view ("pages.user.userDash");
+    }
+
+    public function userLogout(){
+        // session()->forget('userName');
+        // session()->forget('userId');
+        session()->flush();
+        return redirect()->route('userLogin');
+    }
+
+   public function userUpdate(){
+    //    return  $request->id;
+    $id=Session::get("userId");
+    // echo $id;
+    // $id=(Session::get("userId"));
+    $user = EmployeeUser::where('id', $id)->first();
+    // echo $user;
+    return view('pages.user.userUpdate')->with('user', $user);
+   }
+
+   public function userUpdateSubmitted (Request $request){
+    //    return "hi";
+    $user = EmployeeUser::where('id', $request->id)->first();
+
+    // return $request->id;
+    $user->name = $request->name;
+    $user->email= $request->email;
+    $user->phone = $request->phone;
+    $user->address = $request->address;
+    $user->save();
+    // updating session value
+    $request->session()->put("userName",$user->name);
+    $request->session()->put("userEmail",$user->email);
+    $request->session()->put("userPhone",$user->phone);
+    $request->session()->put("userAddress",$user->address);
+    $request->session()->put("userPassword",$user->password);
+    return view ("pages.user.userDash");
+    // return redirect()->route('userUpdate');
+    // return "updated";
+   }
 }

@@ -47,5 +47,9 @@ Route::post('/userRegistration', [EmployeeUserController::class, 'userRegistrati
 
 Route::get('/userLogin', [EmployeeUserController::class, 'userLogin'])->name('userLogin');
 Route::post('/userLogin', [EmployeeUserController::class, 'userLoginSubmit'])->name('userLogin');
+Route::get('/userDash', [EmployeeUserController::class, 'userDash'])->name('userDash')->middleware("ValidUser");
+// ->middleware("ValidTeacher");
+Route::get('/userLogout', [EmployeeUserController::class, 'userLogout'])->name('userLogout');
 
-
+Route::get('/userUpdate', [EmployeeUserController::class, 'userUpdate'])->name('userUpdate')->middleware("ValidUser");
+Route::post('/userUpdate',[EmployeeUserController::class,'userUpdateSubmitted']);
